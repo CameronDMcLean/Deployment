@@ -5,14 +5,13 @@
  Script to create ESXi VMs using provided values & PowerCLI
 
  To-Do:  
- -Add tostring decimal lengths to vnmaneincrement such that the final output fits the two-digit naming convention
- -Test the whole thing & make sure it works
- -Check if VM exists at the same time VMName is filled by the user - add to switch statement?
- -Explore invoke-VM per Dan W
+ -Add loop for VM name (if vmname exists, count +1 & check if vmname + count exists)
+ -
+ -
 #>
 
 #Declare variables
-$VMName = "TestVM Default"
+$OriginalVMName = "TestVM Default"
 $VMHost = "192.168.1.15"
 $VMDatastore = "8TB" #List with get-datastore   
 $VMDiskGB = "40"
@@ -23,8 +22,9 @@ $VMAutostart = $false
 $VMTurnOn = $true
 $VMGuestID = "windows9Server64Guest" #Sets NIC and SCSI adapter type, ref https://www.vmware.com/support/developer/windowstoolkit/wintk40u1/html/New-VM.html
 $ConfirmDefaults = $true
-$VMNameExists = $true
+
 $VMNameIncrement = 1
+$VMName = "null vmname"
 
 #Test code for selecting values
 
@@ -42,7 +42,6 @@ while ($ConfirmDefaults) {
 		9) VMTurnOn = $VMTurnOn
 		10) VMGuestID = $VMGuestID
 		11) Confirm & exit
-		12) Cancel script
 		"
 	)
 	{
@@ -59,41 +58,27 @@ while ($ConfirmDefaults) {
 		"11" {Write-Host "Continuing with current values."
 			$ConfirmDefaults = $false
 			}
-		"12" {Write-host "Cancelling VM config script" return}	
-		
-	}
-
+		}
 }
+
+#Code to auto generate $VMName
+while (get-vm -name $VMName -erroraction silentlycontinue){
+
+	Write-host "$VMName already exists, adding 1."
+	$VMnameIncrement +=1
+	$VMName = $OriginalVMName + $VMNameIncrement
+	Write-host "VMName is now $VMName."
+}
+
+write-host "Generated VMName is $VMName"
+
 
 #Connect to ESXI server
-Write-Host "Connecting to VM Host" $VMHost
+Write-Host "Connecting to VM Host"
 Connect-VIServer -Server $VMHost
 
-# Code to auto generate $VMName
-#While $VMNameExists loop
-#Check if VMName + VMNameIncrement exists, if it does then add 1 to vmnameincrement
-#If it doesn't exist, continue
-<#
-while ($VMNameExists){
-
-	#Tests for existing VM using both variables, returns true if exists or null if not
-	$VMNameExists = Get-VM -name ($VMName + $VMNameIncrement) -erroraction silentlycontinue
-
-	if (!$VMNameExists){
-		Write-Host "Using"($VMName + $VMNameIncrement)
-		$VMName = ($VMName + $VMNameIncrement.ToString)
-		$VMNameExists = $false
-		
-	} else {
-		Write-host "$VMName already exists, adding 1"
-		$VMnameIncrement +=1
-		
-	}
-}
-#>
-
 #Creates VM with variables
-Write-host "Creating VM" $VMName
+Write-host "Creating VM"
 New-VM -Name $VMName -VMHost $VMHost -Datastore $VMDatastore -DiskGB $VMDiskGB -MemoryGB $VMMemoryGB -NumCpu $VMNumCPU -NetworkName $VMNetworkName -GuestId $VMGuestID
 
 #Sets VM to power on automatically
@@ -111,9 +96,11 @@ if ($VMTurnOn){
 Write-Host "Script completed, $VMName created."
 
 <#
+
 cmdlets for testing
 #Powers off VM without waiting for guest OS
 stop-vm $vmName -confirm:$false
 #Permanently removes VM & VM files
 remove-vm $VMName -deletepermanently # Fully deletes $VMName
+
 #>
