@@ -6,8 +6,8 @@
 
  To-Do:  
  -Add loop for VM name (if vmname exists, count +1 & check if vmname + count exists)
- -
- -
+ -Add logic for the switch case statement - list datastores, list vmguestid etc
+ -Get cmdlet to set vmguestid
 #>
 
 #Declare variables
@@ -25,6 +25,9 @@ $ConfirmDefaults = $true
 
 $VMNameIncrement = 1
 $VMName = "null vmname"
+
+
+
 
 #Test code for selecting values
 
@@ -58,8 +61,14 @@ while ($ConfirmDefaults) {
 		"11" {Write-Host "Continuing with current values."
 			$ConfirmDefaults = $false
 			}
-		}
+		
+	}
+
 }
+
+#Connect to ESXI server
+Write-Host "Connecting to VM Host"
+Connect-VIServer -Server $VMHost
 
 #Code to auto generate $VMName
 while (get-vm -name $VMName -erroraction silentlycontinue){
@@ -71,11 +80,6 @@ while (get-vm -name $VMName -erroraction silentlycontinue){
 }
 
 write-host "Generated VMName is $VMName"
-
-
-#Connect to ESXI server
-Write-Host "Connecting to VM Host"
-Connect-VIServer -Server $VMHost
 
 #Creates VM with variables
 Write-host "Creating VM"
@@ -102,5 +106,6 @@ cmdlets for testing
 stop-vm $vmName -confirm:$false
 #Permanently removes VM & VM files
 remove-vm $VMName -deletepermanently # Fully deletes $VMName
-
+#Restarts VM without prompting for confirmation
+Restart-VM $VMname -confirm:$false
 #>
