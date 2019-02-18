@@ -9,5 +9,8 @@
  -
 #>
 
-#Starts *vscode* with install arguments, meant for use in mdt
-Start-Process *VSCode* -ArgumentList "/verysilent /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath'" -wait
+#Install VS Code from local folder. Starts *vscode* with install arguments, meant for use in mdt. Starts with code open, need to adjust
+Start-Process VSCodeSetup-x64-1.31.1.exe /verysilent /mergetasks='!runcode,addcontextmenufiles,addcontextmenufolders,associatewithfiles,addtopath' -Wait
+
+#Installs GitHub Desktop
+msiexec /i .\GitHubDesktopSetup.msi /qn
