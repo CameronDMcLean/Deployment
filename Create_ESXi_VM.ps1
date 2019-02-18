@@ -91,7 +91,6 @@ if ($VMAutostart){
     Set-VMStartPolicy -StartPolicy (Get-VMStartPolicy -VM $VMName) -StartAction PowerOn
 } Else {write-host "Not configuring autostart on VM"} 
 
-
 if ($VMTurnOn){
     Write-host "Turning VM on"
     Start-VM -VM $VMName 
