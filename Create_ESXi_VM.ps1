@@ -8,6 +8,9 @@
  -Add loop for VM name (if vmname exists, count +1 & check if vmname + count exists)
  -Add logic for the switch case statement - list datastores, list vmguestid etc
  -Get cmdlet to set vmguestid
+ -Add Test-NetConnection to confirm VMHost is accessible
+ -Add parameters for VMName & VMHost
+
 #>
 
 #Declare variables

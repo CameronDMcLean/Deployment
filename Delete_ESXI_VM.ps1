@@ -6,7 +6,8 @@
 
  To-Do:  
  -Rework stop-vm bit to use shutdown-guest and wait for VM to stop, then kill after 30s or so
- -
+ -Add Test-NetConnection to confirm VMHost is accessible
+ -Add parameters for VMName & VMHost
 #>
 
 #Declare variables
