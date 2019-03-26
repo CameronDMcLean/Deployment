@@ -48,7 +48,7 @@ write-output "Computer added to domain."
 write-output "Setting computer description..."
 
 #Build description string & show
-#BIOSSerialNumber is misspelled, that's how it is in the source code.
+#BIOSSerialNumber is misspelled, that's how it is in the source code. https://github.com/PowerShell/PowerShell/pull/3167 has been open since Feb 2017 for this issue. 
 $ComputerDescription = "Computer joined by: " + $Credential.username + " Date: " + (get-date -format yyyy-MM-dd) + " Manufacturer: " + (Get-ComputerInfo).csmanufacturer + " Serial number:" + (Get-ComputerInfo).biosseralnumber + " notes: " + $Notes
 write-output "Description will be set to $computerdescription"
 
