@@ -17,7 +17,7 @@
 #> 
 $InactiveDaysInput = ""
 $MaxInactiveDays = 180 #Maximum account inactivity, in days
-$CurrentDate = Get-Date
+$CurrentDate = (get-date).ToString('MM-dd-yyyy_hh-mm-ss')
 $InactiveUsers
 
 $InactiveDaysInput = Read-Host "Enter maximum inactivity period of accounts, or Y to continue with default of $MaxInactiveDays"
@@ -30,11 +30,11 @@ if ($InactiveDaysInput -ne "Y" -and $InactiveDaysInput -ne "y"){
 
 # $MaxLogonDate = (Get-Date).AddDays(-$MaxInactiveDays) # Not needed, causes errors when used with lastlogondate
 
-get-aduser -filter * -properties * | ? {$_.lastlogondate -lt (get-date).adddays(-$MaxInactiveDays)} | 
+get-aduser -filter * -properties * | Where-Object {$_.lastlogondate -lt (get-date).adddays(-$MaxInactiveDays)} | 
 
 Select-Object samaccountname,enabled,distinguishedname,whencreated,passwordlastset,lastlogondate | 
 
-Sort-Object lastlogondate | export-csv "User Cleanup results.csv" -notypeinformation
+Sort-Object lastlogondate | export-csv "User Cleanup Results $CurrentDate.csv" -notypeinformation
 
 <#
 $aduser = Get-ADUser -Filter * -properties "LastLogonDate" 
