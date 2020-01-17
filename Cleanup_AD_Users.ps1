@@ -5,9 +5,6 @@
  Script to delete user objects unused for 6 months from AD
 
  Pseudocode if necessary:
--Determine what an unused computer looks like
-    -Lastlogontimestamp?
-    -Add logic to fix never logged in users
 -List computers & prompt  for confirmation
 -Write deleted computers to log file
 -Output deleted computers
@@ -20,6 +17,8 @@
 #> 
 $InactiveDaysInput = ""
 $MaxInactiveDays = 180 #Maximum account inactivity, in days
+$CurrentDate = Get-Date
+$InactiveUsers
 
 $InactiveDaysInput = Read-Host "Enter maximum inactivity period of accounts, or Y to continue with default of $MaxInactiveDays"
 if ($InactiveDaysInput -ne "Y" -and $InactiveDaysInput -ne "y"){
@@ -29,10 +28,17 @@ if ($InactiveDaysInput -ne "Y" -and $InactiveDaysInput -ne "y"){
     Write-output "Continuing with default 180 days"
 }
 
-$MaxLogonDate = (Get-Date).AddDays(-$MaxInactiveDays) # oldest date, everything before this will be cancelled
+# $MaxLogonDate = (Get-Date).AddDays(-$MaxInactiveDays) # Not needed, causes errors when used with lastlogondate
 
+get-aduser -filter * -properties * | ? {$_.lastlogondate -lt (get-date).adddays(-$MaxInactiveDays)} | 
 
+Select-Object samaccountname,enabled,distinguishedname,whencreated,passwordlastset,lastlogondate | 
+
+Sort-Object lastlogondate | export-csv "User Cleanup results.csv" -notypeinformation
+
+<#
 $aduser = Get-ADUser -Filter * -properties "LastLogonDate" 
 #Where-Object ($_.LastLogonDate -gt $MaxLogonDate) |
 sort-object -property lastlogondate -Descending |
 Format-Table -property name,lastlogondate -AutoSize
+#>
