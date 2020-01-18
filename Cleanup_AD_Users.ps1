@@ -19,6 +19,7 @@ $InactiveDaysInput = ""
 $MaxInactiveDays = 180 #Maximum account inactivity, in days
 $CurrentDate = (get-date).ToString('MM-dd-yyyy_hh-mm-ss')
 $InactiveUsers
+$DeleteInput = "N"
 
 $InactiveDaysInput = Read-Host "Enter maximum inactivity period of accounts, or Y to continue with default of $MaxInactiveDays"
 if ($InactiveDaysInput -ne "Y" -and $InactiveDaysInput -ne "y"){
@@ -30,11 +31,24 @@ if ($InactiveDaysInput -ne "Y" -and $InactiveDaysInput -ne "y"){
 
 # $MaxLogonDate = (Get-Date).AddDays(-$MaxInactiveDays) # Not needed, causes errors when used with lastlogondate
 
-get-aduser -filter * -properties * | Where-Object {$_.lastlogondate -lt (get-date).adddays(-$MaxInactiveDays)} | 
+$InactiveUsers = get-aduser -filter * -properties * | Where-Object {$_.lastlogondate -lt (get-date).adddays(-$MaxInactiveDays)} | 
 
 Select-Object samaccountname,enabled,distinguishedname,whencreated,passwordlastset,lastlogondate | 
 
-Sort-Object lastlogondate | export-csv "User Cleanup Results $CurrentDate.csv" -notypeinformation
+Sort-Object lastlogondate
+ 
+$InactiveUsers | Export-Csv "User Cleanup Results $CurrentDate.csv" -notypeinformation
+
+Write-Output ($InactiveUsers | Format-Table)
+
+$DeleteInput = Read-Host "Continue with disabling accounts?"
+
+if ($DeleteInput -eq "Y" -OR $DeleteInput -eq "y"){
+    Write-output "Disabling accounts."
+    $InactiveUsers | Disable-ADAccount
+} else {
+    Write-output "Not disabling accounts."
+}
 
 <#
 $aduser = Get-ADUser -Filter * -properties "LastLogonDate" 
